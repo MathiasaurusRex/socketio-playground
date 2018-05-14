@@ -27,13 +27,22 @@
 
         form.addEventListener('submit', function(event){
             event.preventDefault();
-            sendMessage();
-        })
+            
+            // Don't send messages when input is empty.
+            if(formElement.value.length > 0) {
+                // Send message function
+                sendMessage();
+                // Clear form input on submit.
+                formElement.value="";
+            };
+
+            
+        });
 
         function sendMessage(){
             socket.emit('chat message', formElement.value);
             return false;
-        }
+        };
 
         socket.on('chat message', function(msg){
             // Get the list of current messages
