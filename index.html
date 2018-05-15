@@ -16,6 +16,7 @@
   
   <body>
     <ul id="messages"></ul>
+    <div id="notification"></div>
     <form id="form" action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
@@ -38,11 +39,24 @@
 
             
         });
+        
+        // This doesn't work.
+        // Needs to fire if changes have occured since a setTimeout so that the message clears
+        formElement.addEventListener('change', function(event){
+            event.preventDefault();
+            if(formElement.value.length > 0){
+                userIsTyping();
+            }
+        })
 
         function sendMessage(){
             socket.emit('chat message', formElement.value);
             return false;
         };
+
+        function userIsTyping(){
+            socket.emit('user typing', formElement.value);
+        }
 
         socket.on('chat message', function(msg){
             // Get the list of current messages
@@ -59,6 +73,14 @@
             // Add the content to the above li
             messageContainer.appendChild(messageContent);
 
+        });
+
+        // This isn't adding to the container.
+        socket.on('user typing', function(msg){
+            var notificationContainer = document.getElementById('notification');
+            var notifcationMessage = document.createTextNode(msg);
+
+            notificationContainer.appendChild(notifcationMessage);
         })
 
     </script>

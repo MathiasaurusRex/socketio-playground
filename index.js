@@ -20,6 +20,12 @@ io.on('connection', function(socket){
         io.emit('chat message', msg);
     })
 
+    // Need to see if this actually works.
+    socket.on('user typing', function(msg){
+        console.log('A user is typing ' + msg);
+        io.emit('user typing', 'A user is typing');
+    })
+
     
 })
 
