@@ -28,6 +28,8 @@
         var form = document.getElementById('form');
         var formElement = document.getElementById('m');
 
+        var previousTypedLength;
+
         form.addEventListener('submit', function(event){
             event.preventDefault();
             
@@ -44,11 +46,24 @@
         
         // This doesn't work.
         // Needs to fire if changes have occured since a setTimeout so that the message clears
-        formElement.addEventListener('change', function(event){
-            event.preventDefault();
-            if(formElement.value.length > 0){
-                userIsTyping();
-            }
+        formElement.addEventListener('input', function(event){
+            
+            var currentTypedLength = formElement.value.length;
+            
+
+
+            // formElement.value.length
+            setTimeout(function(){
+                previousTypedLength = currentTypedLength;
+                if (currentTypedLength == previousTypedLength){
+                    console.log('user is typing');
+                    userIsTyping(true);
+                } else if ( currentTypedLength != previousTypedLength) {
+                    console.log('user is not typing');
+                    userIsTyping(false);
+                }
+            }, 900)
+            
         })
 
         function sendMessage(){
@@ -56,8 +71,14 @@
             return false;
         };
 
-        function userIsTyping(){
-            socket.emit('user typing', formElement.value);
+        function userIsTyping(value){
+            if(value == true) {
+                socket.emit('user typing', formElement.value);
+            }
+            else {
+                socket.emit('user not typing', false);
+            }
+            
         }
 
         socket.on('chat message', function(msg){
@@ -82,7 +103,15 @@
             var notificationContainer = document.getElementById('notification');
             var notifcationMessage = document.createTextNode(msg);
 
+            // Not append child -- add class
             notificationContainer.appendChild(notifcationMessage);
+        })
+
+        socket.on('user not typing', function(msg){
+            var notificationContainer = document.getElementById('notification');
+            var notifcationMessage = document.createTextNode(msg);
+
+            notificationContainer.removeChild();
         })
 
     </script>
