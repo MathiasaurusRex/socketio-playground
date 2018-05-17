@@ -12,6 +12,9 @@
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
+      .displayBlock {
+          display: block!important;
+      }
     </style>
   </head>
   
@@ -19,7 +22,7 @@
     <ul id="messages"></ul>
     
     <form id="form" action="">
-        <div id="notification"></div>
+        <div id="notification" style="display: none;">A user is typing</div>
         <input id="m" autocomplete="off" /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
@@ -27,6 +30,7 @@
         var socket = io();
         var form = document.getElementById('form');
         var formElement = document.getElementById('m');
+        var typingTimeout;
 
         var previousTypedLength;
 
@@ -47,22 +51,16 @@
         // This doesn't work.
         // Needs to fire if changes have occured since a setTimeout so that the message clears
         formElement.addEventListener('input', function(event){
-            
+
             var currentTypedLength = formElement.value.length;
-            
 
+            if (typingTimeout != undefined){
+                clearTimeout(typingTimeout);
+            }
+            typingTimeout = setTimeout(userIsTyping(true), 250);
 
-            // formElement.value.length
-            setTimeout(function(){
-                previousTypedLength = currentTypedLength;
-                if (currentTypedLength == previousTypedLength){
-                    console.log('user is typing');
-                    userIsTyping(true);
-                } else if ( currentTypedLength != previousTypedLength) {
-                    console.log('user is not typing');
-                    userIsTyping(false);
-                }
-            }, 900)
+            // console.log(formElement.value.length);
+            // formElement.value.lengt
             
         })
 
@@ -72,6 +70,7 @@
         };
 
         function userIsTyping(value){
+            console.log(value);
             if(value == true) {
                 socket.emit('user typing', formElement.value);
             }
@@ -104,7 +103,8 @@
             var notifcationMessage = document.createTextNode(msg);
 
             // Not append child -- add class
-            notificationContainer.appendChild(notifcationMessage);
+            // notificationContainer.appendChild(notifcationMessage);
+            notificationContainer.classList.add('displayBlock');
         })
 
         socket.on('user not typing', function(msg){
